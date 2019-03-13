@@ -353,19 +353,25 @@ namespace SurvivalCS
             for (int i = 0; i < fSamples.RowCount; i++)
             {
                 Vector<double> currentRow = fSamples.Row(i);
-                Vector<double> theta = w.Multiply(currentRow); // A 2 dim vector that will be converted to the 2 Weibull params.
-                double shape = sShape.Transform(theta[0]); // To prevent the parameters from becoming negative, we use sigmoids.
+                // A 2 dim vector that will be converted to the 2 Weibull params.
+                Vector<double> theta = w.Multiply(currentRow);
+                // To prevent the parameters from becoming negative, we use sigmoids.
+                double shape = sShape.Transform(theta[0]);
                 double scale = sScale.Transform(theta[1]);
                 //// double pdf = this.PDF(t.ElementAt(i), kappa, lambda);
 
                 Vector<double> lpdfGrad = this.GradLPDF(t.ElementAt(i), shape, scale);
-                Vector<double> sigmoidGrad = Vector<double>.Build.DenseOfArray(new double[] { sShape.Grad(theta[0]), sScale.Grad(theta[1]) });
-                Vector<double> delTheta = lpdfGrad.PointwiseMultiply(sigmoidGrad); // Since we used the sigmoids, the product rule dictates that we point-wise multiply the derivatives.
+                Vector<double> sigmoidGrad 
+                    = Vector<double>.Build.DenseOfArray(new double[] {sShape.Grad(theta[0]), sScale.Grad(theta[1])});
+                // Since we used the sigmoids, the product rule dictates that we point-wise multiply the derivatives.
+                Vector<double> delTheta = lpdfGrad.PointwiseMultiply(sigmoidGrad);
 
                 gradW = gradW.Add(delTheta.OuterProduct(currentRow)); //// currentRow is just feature vector.
 
-                if (double.IsNaN(gradW[0, 0]) || double.IsPositiveInfinity(gradW[0, 0]) || double.IsNegativeInfinity(gradW[0, 0]))
+                if (double.IsNaN(gradW[0, 0]) || double.IsPositiveInfinity(gradW[0, 0])
+                    || double.IsNegativeInfinity(gradW[0, 0]))
                 {
+                    // Hopefully, we will never enter this code path.
                     throw new Exception("The moment we feared has arrived, gradient has blown up due to samples data." +
                         "First, try tightening the upper bounds for the shape and scale parameters" +
                         "and if that doesn't work, add a break point here. My suspicion in delTheta");
@@ -374,7 +380,8 @@ namespace SurvivalCS
                 /* Since we are dividing the matrix by the pdf, we need to be careful it doesn't blow up.
                 if (pdf > eps)
                 {
-                    gradW = gradW.Add(delTheta.OuterProduct(currentRow).Divide(pdf)); // del/del(W) log(lik(x,W.f)) = 1/lik(x,W.f) * f. (del(lik(x))/del(W.f))^T
+                    gradW = gradW.Add(delTheta.OuterProduct(currentRow).Divide(pdf));
+                    // del/del(W) log(lik(x,W.f)) = 1/lik(x,W.f) * f. (del(lik(x))/del(W.f))^T
                 }
                 else
                 {
@@ -390,17 +397,20 @@ namespace SurvivalCS
             {
                 Vector<double> currentRow = fCensored.Row(i);
                 Vector<double> theta = w.Multiply(currentRow);
-                double shape = sShape.Transform(theta[0]); // To prevent the parameters from becoming negative, we use sigmoids.
+                // To prevent the parameters from becoming negative, we use sigmoids.
+                double shape = sShape.Transform(theta[0]); 
                 double scale = sScale.Transform(theta[1]);
                 //// double survival = this.Survival(t.ElementAt(i), kappa, lambda);
 
                 Vector<double> lsurvivalGrad = this.GradLSurvival(x.ElementAt(i), shape, scale);
-                Vector<double> sigmoidGrad = Vector<double>.Build.DenseOfArray(new double[] { sShape.Grad(theta[0]), sScale.Grad(theta[1]) });
+                Vector<double> sigmoidGrad = 
+                    Vector<double>.Build.DenseOfArray(new double[] { sShape.Grad(theta[0]), sScale.Grad(theta[1]) });
                 Vector<double> delTheta = lsurvivalGrad.PointwiseMultiply(sigmoidGrad);
 
                 gradW = gradW.Add(delTheta.OuterProduct(currentRow));
 
-                if (double.IsNaN(gradW[0, 0]) || double.IsPositiveInfinity(gradW[0, 0]) || double.IsNegativeInfinity(gradW[0, 0]))
+                if (double.IsNaN(gradW[0, 0]) || double.IsPositiveInfinity(gradW[0, 0]) 
+                    || double.IsNegativeInfinity(gradW[0, 0]))
                 {
                     throw new Exception("The moment we feared has arrived, gradient has blown up due to censored data." +
                         "First, try tightening the upper bounds for the shape and scale parameters" +
@@ -426,7 +436,8 @@ namespace SurvivalCS
         }
 
         /// <summary>
-        /// This is a wrapper for GradLL which fills in some values for the feature sets for the sampled and censored data.
+        /// This is a wrapper for GradLL which fills in some values for the feature sets for the sampled 
+        /// and censored data.
         /// Useful especially for validating gradients.
         /// </summary>
         /// <param name="w">The matrix of parameters.</param>
@@ -451,7 +462,8 @@ namespace SurvivalCS
         /// </summary>
         /// <param name="shape">The shape parameter of the distribution.</param>
         /// <param name="scale">The scale parameter of the distribution.</param>
-        /// <returns>A two dimensional vector with the derivatives of likelihood function with respect to scale and shape.</returns>
+        /// <returns>A two dimensional vector with the derivatives of likelihood function with 
+        /// respect to scale and shape.</returns>
         public abstract Vector<double> GradLL(double shape, double scale);
 
         /// <summary>
