@@ -34,7 +34,8 @@ namespace SurvivalCS
         /// Initializes a new instance of the <see cref="BaseModel"/> class.
         /// </summary>
         /// <param name="organicRecoveryDurations">An array of durations of transitions.</param>
-        /// <param name="inorganicRecoveryDurations">The list of thresholds Fabric actually waited before rebooting.</param>
+        /// <param name="inorganicRecoveryDurations">The list of thresholds Fabric actually 
+        /// waited before rebooting.</param>
         public BaseModel(
             List<double> organicRecoveryDurations,
             List<double> inorganicRecoveryDurations)
@@ -57,9 +58,12 @@ namespace SurvivalCS
         /// Initializes a new instance of the <see cref="BaseModel"/> class.
         /// </summary>
         /// <param name="organicRecoveryDurations">An array of durations of transitions.</param>
-        /// <param name="inorganicRecoveryDurations">The list of thresholds Fabric actually waited before rebooting.</param>
-        /// <param name="organicRecoveryDurationsByContainer">Organic recovery durations multiplied by container count</param>
-        /// <param name="inorganicRecoveryCountByContainer">Inorganic recovery count multiplied by container count</param>
+        /// <param name="inorganicRecoveryDurations">The list of thresholds Fabric actually 
+        /// waited before rebooting.</param>
+        /// <param name="organicRecoveryDurationsByContainer">Organic recovery durations multiplied 
+        /// by container count</param>
+        /// <param name="inorganicRecoveryCountByContainer">Inorganic recovery count multiplied by 
+        /// container count</param>
         public BaseModel(
             List<double> organicRecoveryDurations,
             List<double> inorganicRecoveryDurations,
@@ -91,10 +95,13 @@ namespace SurvivalCS
         /// Initializes a new instance of the <see cref="BaseModel"/> class.
         /// </summary>
         /// <param name="organicRecoveryDurations">An array of durations of transitions.</param>
-        /// <param name="inorganicRecoveryDurations">The list of thresholds Fabric actually waited before rebooting.</param>
-        /// <param name="organicRecoveryFeatureData">The features corresponding to samples of organic recovery in a matrix.
+        /// <param name="inorganicRecoveryDurations">The list of thresholds Fabric actually 
+        /// waited before rebooting.</param>
+        /// <param name="organicRecoveryFeatureData">The features corresponding to samples of 
+        /// organic recovery in a matrix.
         /// The number of rows should be the same as organicRecoveryDurations.</param>
-        /// <param name="inorganicRecoveryFeatureData">The features corresponding to samples of inorganic transitions to rebooting in a matrix.
+        /// <param name="inorganicRecoveryFeatureData">The features corresponding to samples of 
+        /// inorganic transitions to rebooting in a matrix.
         /// The number of rows should be the same as inorganicRecoveryDurations.</param>
         public BaseModel(
             List<double> organicRecoveryDurations,
@@ -219,19 +226,23 @@ namespace SurvivalCS
         /// <summary>
         /// The inverse of the CDF of the distribution if it exists.
         /// </summary>
-        /// <param name="p">The value at which the inverse cdf is to be calculated. Must be between 0 and 1.</param>
+        /// <param name="p">The value at which the inverse cdf is to be calculated. 
+        /// Must be between 0 and 1.</param>
         /// <returns>A double which is the inverse of the cdf.</returns>
         public abstract double InverseCDF(double p);
 
         /// <summary>
-        /// Calculates the survival function, or the probability that the distribution will exceed a certain value.
+        /// Calculates the survival function, or the probability that the distribution will 
+        /// exceed a certain value.
         /// </summary>
-        /// <param name="x">The value at which the survival function is to be calculated (usually time in seconds).</param>
+        /// <param name="x">The value at which the survival function is to be calculated 
+        /// (usually time in seconds).</param>
         /// <returns>A double which is the survival function</returns>
         public abstract double Survival(double x);
 
         /// <summary>
-        /// The log of the survival function of the distribution (area under curve beyond a certain value)
+        /// The log of the survival function of the distribution (area under curve beyond 
+        /// a certain value)
         /// </summary>
         /// <param name="x">The value at which the log pdf is to be calculated</param>
         /// <param name="shape">The shape parameter of the distribution.</param>
@@ -258,7 +269,8 @@ namespace SurvivalCS
         public abstract Vector<double> GradLSurvival(double x, double k, double lmb);
 
         /// <summary>
-        /// The log-likelihood of the Weibull distribution on censored and uncensored arrays with features.
+        /// The log-likelihood of the Weibull distribution on censored and uncensored arrays 
+        /// with features.
         /// </summary>
         /// <param name="w">The matrix of parameters.</param>
         /// <param name="fSamples">The features corresponding to the organic recoveries.
@@ -374,7 +386,8 @@ namespace SurvivalCS
                 // we point-wise multiply the derivatives.
                 Vector<double> delTheta = lpdfGrad.PointwiseMultiply(sigmoidGrad);
 
-                gradW = gradW.Add(delTheta.OuterProduct(currentRow)); //// currentRow is just feature vector.
+                // currentRow is just feature vector.
+                gradW = gradW.Add(delTheta.OuterProduct(currentRow));
 
                 if (double.IsNaN(gradW[0, 0]) || double.IsPositiveInfinity(gradW[0, 0])
                     || double.IsNegativeInfinity(gradW[0, 0]))
@@ -386,7 +399,8 @@ namespace SurvivalCS
                         "and if that doesn't work, add a break point here. My suspicion in delTheta");
                 }
 
-                /* Since we are dividing the matrix by the pdf, we need to be careful it doesn't blow up.
+                /* Since we are dividing the matrix by the pdf, we need to be 
+                   careful it doesn't blow up.
                 if (pdf > eps)
                 {
                     gradW = gradW.Add(delTheta.OuterProduct(currentRow).Divide(pdf));
@@ -395,7 +409,8 @@ namespace SurvivalCS
                 else
                 {
                     double survival = this.Survival(bailOutSurvivalValue, kappa, lambda);
-                    Vector<double> survivalGrad = this.GradSurvival(bailOutSurvivalValue, kappa, lambda, survival);
+                    Vector<double> survivalGrad = this.GradSurvival(bailOutSurvivalValue, 
+                                    kappa, lambda, survival);
                     delTheta = survivalGrad.PointwiseMultiply(sigmoidGrad);
                     gradW = gradW.Add(delTheta.OuterProduct(currentRow).Divide(survival));
                 }
@@ -429,7 +444,8 @@ namespace SurvivalCS
                 }
 
                 /*
-                Since we are dividing the matrix by the survival, we need to be careful it doesn't blow up.
+                Since we are dividing the matrix by the survival, we need to be 
+                careful it doesn't blow up.
                 if (survival > eps)
                 {
                 }
@@ -546,12 +562,14 @@ namespace SurvivalCS
         }
 
         /// <summary>
-        /// Calculates the hessian, which is the matrix of second derivatices numerically for models with two parameters.
+        /// Calculates the hessian, which is the matrix of second derivatices numerically 
+        /// for models with two parameters.
         /// Assumes that loglikelihood has been implemented.
         /// </summary>
         /// <param name="k">The shape parameter.</param>
         /// <param name="lmb">The scale parameter.</param>
-        /// <returns>A MathNet 2x2 matrix which is the second derivatives calculated numerically.</returns>
+        /// <returns>A MathNet 2x2 matrix which is the second derivatives calculated numerically.
+        /// </returns>
         public Matrix<double> NumericalHessianLL(double k, double lmb)
         {
             Matrix<double> hessian = Matrix<double>.Build.Dense(2, 2);
@@ -578,7 +596,8 @@ namespace SurvivalCS
         /// <summary>
         /// Calculates the hazard rate corresponding to the current instance of the model.
         /// </summary>
-        /// <param name="t">The value (in seconds) at which the hazard rate is to be calculated</param>
+        /// <param name="t">The value (in seconds) at which the hazard rate is to be calculated
+        /// </param>
         /// <returns>The hazard rate at t.</returns>
         public double HazardRate(double t)
         {
@@ -588,7 +607,8 @@ namespace SurvivalCS
         }
 
         /// <summary>
-        /// Calculates the optimal reboot threshold if one exists assuming it is between 3 and 10 minutes 
+        /// Calculates the optimal reboot threshold if one exists assuming 
+        /// it is between 3 and 10 minutes 
         /// by simply looping over candidates.
         /// </summary>
         /// <param name="interventionCost">The amount of time in seconds it takes to recover 
@@ -623,24 +643,29 @@ namespace SurvivalCS
             // We'll only get here if no minima exists
             if (doesMaximaExist)
             {
-                return 600.0; // Only maxima exists, no minima. So, model says high threshold is always good.
+                // Only maxima exists, no minima. So, model says high threshold is always good.
+                return 600.0;
             }
             else
             {
                 // Neither minima nor maxima exists.
                 if (hazardDelta > 0)
                 {
-                    return 0.0; // Reboot hazard rate has always been higher, so reboot as soon as possible.
+                    // Reboot hazard rate has always been higher, so reboot as soon as possible.
+                    return 0.0;
                 }
                 else
                 {
-                    return 600.0; // Reboot hazard rate has always been lower than organic, so reboot as late as possible.
+                    // Reboot hazard rate has always been lower than organic, so reboot 
+                    // as late as possible.
+                    return 600.0;
                 }
             }
         }
 
         /// <summary>
-        /// Executes Gradient Descent on the LogLikelihood function using the analytic gradient. To be used for 
+        /// Executes Gradient Descent on the LogLikelihood function using the analytic gradient. 
+        /// To be used for 
         /// debugging purposes.
         /// </summary>
         /// <param name="parameters">The matrix of starting parameters.</param>
@@ -648,17 +673,20 @@ namespace SurvivalCS
         /// <returns>The parameters which correspond to a minima for the log lihelihood.</returns>
         public Matrix<double> GradientDescent(Matrix<double> parameters, int iterations=4001)
         {
-            Matrix<double> parameters1 = Matrix<double>.Build.Dense(parameters.RowCount, parameters.ColumnCount);
-            Matrix<double> parameters2 = Matrix<double>.Build.Dense(parameters.RowCount, parameters.ColumnCount);
+            Matrix<double> parameters1 = Matrix<double>.Build.Dense(parameters.RowCount, 
+                                                                    parameters.ColumnCount);
+            Matrix<double> parameters2 = Matrix<double>.Build.Dense(parameters.RowCount, 
+                                                                    parameters.ColumnCount);
             double oldLL, newLL = 0, t = 0;
-            List<double> alphas = new List<double> { 10, 2, 1, 1e-1, 1e-2, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8 };
+            List<double> alphas = new List<double> {10, 2, 1, 1e-1, 1e-2, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8};
 
             Console.WriteLine("##################Beginning Gradient Ascent###################");
             for (int i = 0; i < iterations; i++)
             {
                 Matrix<double> direction = this.GradLL(parameters), temp = parameters;
-                //// direction = direction / direction.L2Norm(); //// Normalizing the gradient produces an alternate approach to gradient ascent/descent.
-                
+                //// Normalizing the gradient produces an alternate approach to gradient ascent/descent.
+                //// direction = direction / direction.L2Norm();
+
                 // Always take a very small step to avoid having the algorithm stuck.
                 parameters2 = parameters + (1e-10 * direction); 
 
@@ -690,7 +718,8 @@ namespace SurvivalCS
         }
 
         /// <summary>
-        /// Runs gradient descent method to find the parameters that maximize the likelihood of seeing the data.
+        /// Runs gradient descent method to find the parameters that maximize the likelihood 
+        /// of seeing the data.
         /// </summary>
         /// <param name="initialGuess">The initial guess for the scale and shape parameters.</param>
         /// <param name="numIter">The maximum number of iterations the routine should run.</param>
@@ -702,7 +731,9 @@ namespace SurvivalCS
             // called for a given use case and fine - tune.
             Dictionary<double, int> stepLengths = new Dictionary<double, int>
             {
-                { 0.00001, 0 }, { 0.0001, 0 }, { 0.001, 0 }, { 0.01, 0 }, { 0.1, 0 }, { 1.0, 0 }, { 2.0, 0 }, { 2.5, 0 }, { 3.0, 0 }, { 7.0, 0 }, { 100.0, 0 }, { 200, 0 }, { 1000.0, 0 }
+                { 0.00001, 0 }, { 0.0001, 0 }, { 0.001, 0 }, { 0.01, 0 }, { 0.1, 0 },
+                { 1.0, 0 }, { 2.0, 0 }, { 2.5, 0 }, { 3.0, 0 }, { 7.0, 0 }, { 100.0, 0 },
+                { 200, 0 }, { 1000.0, 0 }
             };
 
             Vector<double> parameters1 = initialGuess;
@@ -753,18 +784,21 @@ namespace SurvivalCS
         }
 
         /// <summary>
-        /// Runs the Newton Rhapson method to find the parameters that maximize the likelihood of seeing the data.
+        /// Runs the Newton Rhapson method to find the parameters that maximize the likelihood 
+        /// of seeing the data.
         /// </summary>
         /// <param name="initialGuess">The initial guess for the scale and shape parameters.</param>
         /// <param name="numIter">The maximum number of iterations the routine should run.</param>
         /// <returns>A vector with the optimum parameters that maximize likelihood.</returns>
         public Vector<double> NewtonRaphson(Vector<double> initialGuess, int numIter = 201)
         {
-            // These are candidate step lengths. Maintained as a dictionary since we might want to see how often the step lengths are 
+            // These are candidate step lengths. Maintained as a dictionary since 
+            // we might want to see how often the step lengths are 
             // called for a given use case and fine - tune.
             Dictionary<double, int> stepLengths = new Dictionary<double, int>
             {
-                { 0.001, 0 }, { 0.01, 0 }, { 0.1, 0 }, { 1.0, 0 }, { 2.0, 0 }, { 2.5, 0 }, { 3.0, 0 }, { 7.0, 0 }, { 100.0, 0 }, { 200, 0 }, { 1000.0, 0 }
+                { 0.001, 0 }, { 0.01, 0 }, { 0.1, 0 }, { 1.0, 0 }, { 2.0, 0 },
+                { 2.5, 0 }, { 3.0, 0 }, { 7.0, 0 }, { 100.0, 0 }, { 200, 0 }, { 1000.0, 0 }
             };
 
             Vector<double> parameters1 = initialGuess;
@@ -815,8 +849,10 @@ namespace SurvivalCS
         /// <returns>A matrix of features.</returns>
         protected Tuple<Matrix<double>, Matrix<double>> PopulateFeatureMatrices(int numFeatures)
         {
-            Matrix<double> fSamples = Matrix<double>.Build.Dense(this.OrganicRecoveryDurations.Count, numFeatures);
-            Matrix<double> fCensored = Matrix<double>.Build.Dense(this.OrganicRecoveryDurations.Count, numFeatures);
+            Matrix<double> fSamples = Matrix<double>.Build.Dense(
+                this.OrganicRecoveryDurations.Count, numFeatures);
+            Matrix<double> fCensored = Matrix<double>.Build.Dense(
+                this.OrganicRecoveryDurations.Count, numFeatures);
 
             for (int i = 0; i < fSamples.RowCount; i++)
             {
