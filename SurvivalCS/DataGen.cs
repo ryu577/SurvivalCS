@@ -71,6 +71,25 @@ namespace SurvivalCS
             this.fCensored = fCensored;
         }
 
+        public void GenTrivFeaturesData()
+        {
+            var ti = new List<double> { 1.0, 1.0};
+            var xi = new List<double> { 1.0, 1.0};
+
+            List<double[]> fSamplesData = new List<double[]>();
+            List<double[]> fCensoredData = new List<double[]>();
+            fSamplesData.Add(new double[] { 1.0, 1.0 });
+            fSamplesData.Add(new double[] { 1.0, 1.0 });
+            fCensoredData.Add(new double[] { 1.0, 1.0 });
+            fCensoredData.Add(new double[] { 1.0, 1.0 });
+            Matrix<double> fSamples = Matrix<double>.Build.DenseOfArray(CreateRectangularArray(fSamplesData));
+            Matrix<double> fCensored = Matrix<double>.Build.DenseOfArray(CreateRectangularArray(fCensoredData));
+            this.fSamples = fSamples;
+            this.fCensored = fCensored;
+            this.organicRecoveryDurations = ti;
+            this.inorganicRecoverydurations = xi;
+        }
+
         public static List<double> NPOnes(int n, double val)
         {
             List<double> res = new List<double>();

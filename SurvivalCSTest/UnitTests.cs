@@ -71,6 +71,55 @@ namespace SurvivalCSTest
         }
 
         [TestMethod]
+        public void TestLogLogLogisticFeaturedLL()
+        {
+            DataGen dg = new DataGen();
+            dg.GenTrivFeaturesData();
+            double shapeMax = 5.0;
+            double scaleMax = 900.0;
+
+            LogLogistic modelLogLogisticFeatured = new LogLogistic(dg.organicRecoveryDurations,
+                dg.inorganicRecoverydurations,
+                dg.fSamples, dg.fCensored);
+
+            modelLogLogisticFeatured.ShapeUpperBound = shapeMax;
+            modelLogLogisticFeatured.ScaleUpperBound = scaleMax;
+
+            double[,] warr = new double[2, 2]{  {1,1}, 
+                                                {1,1}
+                                              };
+            Matrix<double> w = Matrix<double>.Build.DenseOfArray(warr);
+            var loglik = modelLogLogisticFeatured.LogLikelihood(w, dg.fSamples, dg.fCensored);
+            System.Console.WriteLine("LogLikelihood is: " + loglik.ToString());
+            Assert.IsTrue(Math.Abs(loglik + 55.83229)<1e-3);
+        }
+
+        [TestMethod]
+        public void TestLogLogisticFeaturedGrad()
+        {
+            DataGen dg = new DataGen();
+            dg.GenTrivFeaturesData();
+            double shapeMax = 5.0;
+            double scaleMax = 900.0;
+
+            LogLogistic modelLogLogisticFeatured = new LogLogistic(dg.organicRecoveryDurations,
+                dg.inorganicRecoverydurations,
+                dg.fSamples, dg.fCensored);
+
+            modelLogLogisticFeatured.ShapeUpperBound = shapeMax;
+            modelLogLogisticFeatured.ScaleUpperBound = scaleMax;
+
+            double[,] warr = new double[2, 2]{  {1,1},
+                                                {1,1}
+                                              };
+            Matrix<double> w = Matrix<double>.Build.DenseOfArray(warr);
+            var grd = modelLogLogisticFeatured.GradLL2(w, dg.fSamples, dg.fCensored);
+            var grd_numr = modelLogLogisticFeatured.NumericalGradLL(w);
+            System.Console.WriteLine("Gradient first component:" + grd[0,0].ToString());
+            Assert.IsTrue(Math.Abs(grd[0,0]-grd_numr[0,0]) < 1e-3);
+        }
+
+        [TestMethod]
         public void TestLogLogisticWFeatures()
         {
             DataGen dg = new DataGen();
@@ -81,7 +130,8 @@ namespace SurvivalCSTest
 
             double[] arr = new double[] { 1.0, 150.0 };
             Vector<double> init = Vector<double>.Build.DenseOfArray(arr);
-            LogLogistic modelLogLogistic = new LogLogistic(dg.organicRecoveryDurations, dg.inorganicRecoverydurations);
+            LogLogistic modelLogLogistic = new LogLogistic(dg.organicRecoveryDurations, 
+                                                           dg.inorganicRecoverydurations);
             modelLogLogistic.GradientDescent(init);
             
             Console.WriteLine("LL without features is " + 
@@ -99,8 +149,10 @@ namespace SurvivalCSTest
             modelLogLogisticFeatured.ShapeUpperBound = shapeMax;
             modelLogLogisticFeatured.ScaleUpperBound = scaleMax;
             Matrix<double> logLogisticParameters = modelLogLogisticFeatured.GradientDescent(w, 2001);
-            Vector<double> frstSample = Vector<double>.Build.DenseOfArray(new double[] {1.0, 2.0, 3.0});
-            Vector<double> scndSample = Vector<double>.Build.DenseOfArray(new double[] {1.0, 4.0, 2.0});
+            Vector<double> frstSample = Vector<double>.Build.DenseOfArray(
+                new double[] {1.0, 2.0, 3.0});
+            Vector<double> scndSample = Vector<double>.Build.DenseOfArray(
+                new double[] {1.0, 4.0, 2.0});
 
             Vector<double> res = logLogisticParameters.Multiply(frstSample);
             var alpha_shape = res[0];

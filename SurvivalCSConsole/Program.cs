@@ -20,7 +20,8 @@ namespace SurvivalCSConsole
         static void Main(string[] args)
         {
             var ut = new UnitTests();
-            ut.TestLogLogisticWFeatures();
-        }        
+            //ut.TestLogLogisticWFeatures();
+            ut.TestLogLogLogisticFeaturedLL();
+        }
     }
 }

@@ -266,7 +266,8 @@ namespace SurvivalCS
         /// <param name="fCensored">The features corresponding to the reboots.
         /// Number of rows should be the same as this.InorganicRecoveryDurations.Length</param>
         /// <returns>The log-likelihood of the data along with features.</returns>
-        public double LogLikelihood(Matrix<double> w, Matrix<double> fSamples, Matrix<double> fCensored)
+        public double LogLikelihood(Matrix<double> w, Matrix<double> fSamples, 
+                                    Matrix<double> fCensored)
         {
             List<double> t = this.OrganicRecoveryDurations;
             List<double> x = this.InorganicRecoveryDurations;
@@ -296,7 +297,8 @@ namespace SurvivalCS
         }
 
         /// <summary>
-        /// This is a wrapper for LogLikelihood which fills in some values for the feature sets for the sampled and censored data.
+        /// This is a wrapper for LogLikelihood which fills in some values for the 
+        /// feature sets for the sampled and censored data.
         /// Useful especially for validating gradients.
         /// </summary>
         /// <param name="w">The matrix of parameters.</param>
@@ -305,12 +307,14 @@ namespace SurvivalCS
         {
             if (this.OrganicRecoveryFeatureData == null || this.InorganicRecoveryFeatureData == null)
             {
-                Tuple<Matrix<double>, Matrix<double>> features = this.PopulateFeatureMatrices(w.ColumnCount);
+                Tuple<Matrix<double>, Matrix<double>> features 
+                    = this.PopulateFeatureMatrices(w.ColumnCount);
                 return this.LogLikelihood(w, features.Item1, features.Item2);
             }
             else
             {
-                return this.LogLikelihood(w, this.OrganicRecoveryFeatureData, this.InorganicRecoveryFeatureData);
+                return this.LogLikelihood(w, this.OrganicRecoveryFeatureData, 
+                                             this.InorganicRecoveryFeatureData);
             }
         }
 
@@ -340,9 +344,11 @@ namespace SurvivalCS
         /// <param name="fCensored">Inorganic recover time data.</param>
         /// <param name="eps">Threshold for small pdf.</param>
         /// <param name="bailOutSurvivalValue">Threshold for small survival function.</param>
-        /// <returns>The gradient of the log-likelihood function with respect to w (the weights).</returns>
-        public Matrix<double> GradLL2(Matrix<double> w, Matrix<double> fSamples, Matrix<double> fCensored, 
-                                double eps = 1e-8, double bailOutSurvivalValue = 10.0)
+        /// <returns>The gradient of the log-likelihood function with respect to w (the weights).
+        /// </returns>
+        public Matrix<double> GradLL2(Matrix<double> w, Matrix<double> fSamples, 
+                                    Matrix<double> fCensored, 
+                                    double eps = 1e-8, double bailOutSurvivalValue = 10.0)
         {
             List<double> t = this.OrganicRecoveryDurations;
             List<double> x = this.InorganicRecoveryDurations;
@@ -362,8 +368,10 @@ namespace SurvivalCS
 
                 Vector<double> lpdfGrad = this.GradLPDF(t.ElementAt(i), shape, scale);
                 Vector<double> sigmoidGrad 
-                    = Vector<double>.Build.DenseOfArray(new double[] {sShape.Grad(theta[0]), sScale.Grad(theta[1])});
-                // Since we used the sigmoids, the product rule dictates that we point-wise multiply the derivatives.
+                    = Vector<double>.Build.DenseOfArray(new double[] {sShape.Grad(theta[0]),
+                                                        sScale.Grad(theta[1])});
+                // Since we used the sigmoids, the product rule dictates that 
+                // we point-wise multiply the derivatives.
                 Vector<double> delTheta = lpdfGrad.PointwiseMultiply(sigmoidGrad);
 
                 gradW = gradW.Add(delTheta.OuterProduct(currentRow)); //// currentRow is just feature vector.
@@ -372,7 +380,8 @@ namespace SurvivalCS
                     || double.IsNegativeInfinity(gradW[0, 0]))
                 {
                     // Hopefully, we will never enter this code path.
-                    throw new Exception("The moment we feared has arrived, gradient has blown up due to samples data." +
+                    throw new Exception("The moment we feared has arrived, gradient has blown"+
+                        "up due to samples data." +
                         "First, try tightening the upper bounds for the shape and scale parameters" +
                         "and if that doesn't work, add a break point here. My suspicion in delTheta");
                 }
@@ -404,7 +413,8 @@ namespace SurvivalCS
 
                 Vector<double> lsurvivalGrad = this.GradLSurvival(x.ElementAt(i), shape, scale);
                 Vector<double> sigmoidGrad = 
-                    Vector<double>.Build.DenseOfArray(new double[] { sShape.Grad(theta[0]), sScale.Grad(theta[1]) });
+                    Vector<double>.Build.DenseOfArray(
+                        new double[] { sShape.Grad(theta[0]), sScale.Grad(theta[1])});
                 Vector<double> delTheta = lsurvivalGrad.PointwiseMultiply(sigmoidGrad);
 
                 gradW = gradW.Add(delTheta.OuterProduct(currentRow));
@@ -412,7 +422,8 @@ namespace SurvivalCS
                 if (double.IsNaN(gradW[0, 0]) || double.IsPositiveInfinity(gradW[0, 0]) 
                     || double.IsNegativeInfinity(gradW[0, 0]))
                 {
-                    throw new Exception("The moment we feared has arrived, gradient has blown up due to censored data." +
+                    throw new Exception("The moment we feared has arrived, gradient has blown"+ 
+                        "up due to censored data." +
                         "First, try tightening the upper bounds for the shape and scale parameters" +
                         "and if that doesn't work, add a break point here. My suspicion in delTheta");
                 }
@@ -446,14 +457,14 @@ namespace SurvivalCS
         {
             if (this.OrganicRecoveryFeatureData == null || this.InorganicRecoveryFeatureData == null)
             {
-                Tuple<Matrix<double>, Matrix<double>> features = this.PopulateFeatureMatrices(w.ColumnCount);
+                Tuple<Matrix<double>, Matrix<double>> features 
+                    = this.PopulateFeatureMatrices(w.ColumnCount);
                 return this.GradLL2(w, features.Item1, features.Item2);
             }
             else
             {
-                // return this.GradLL(w, this.OrganicRecoveryFeatureData, this.InorganicRecoveryFeatureData);
-                // test use
-                return this.GradLL2(w, this.OrganicRecoveryFeatureData, this.InorganicRecoveryFeatureData);
+                return this.GradLL2(w, this.OrganicRecoveryFeatureData, 
+                                    this.InorganicRecoveryFeatureData);
             }
         }
 
@@ -477,14 +488,17 @@ namespace SurvivalCS
             double n = this.OrganicRecoveryCount;
             List<double> t = this.OrganicRecoveryDurations;
             List<double> x = this.InorganicRecoveryDurations;
-            return t.Sum(ti => this.LogPdf(ti, shape, scale)) + x.Sum(xi => this.LogSurvival(xi, shape, scale));
+            return t.Sum(ti => this.LogPdf(ti, shape, scale)) 
+                + x.Sum(xi => this.LogSurvival(xi, shape, scale));
         }
 
         /// <summary>
-        /// Calculates the numerical gradient of the log likelihood with respect to a matrix of parameters.
+        /// Calculates the numerical gradient of the log likelihood with respect to 
+        /// a matrix of parameters.
         /// </summary>
         /// <param name="w">The matrix of input parameters.</param>
-        /// <param name="h">The delta by which the parameters will be perturbed for finding the derivative.
+        /// <param name="h">The delta by which the parameters will be perturbed for 
+        /// finding the derivative.
         /// Should be small.</param>
         /// <returns>A matrix containing the values of the numerical derivative.</returns>
         public Matrix<double> NumericalGradLL(Matrix<double> w, double h = 1e-5)
@@ -497,7 +511,8 @@ namespace SurvivalCS
                 for (int j = 0; j < w.ColumnCount; j++)
                 {
                     hMatrix[i, j] = h;
-                    gradW[i, j] = (this.LogLikelihood(w + hMatrix) - this.LogLikelihood(w - hMatrix)) / (2 * h);
+                    gradW[i, j] = (this.LogLikelihood(w + hMatrix) 
+                                 - this.LogLikelihood(w - hMatrix)) / (2 * h);
                     hMatrix[i, j] = 0;
                 }
             }
@@ -506,19 +521,23 @@ namespace SurvivalCS
         }
 
         /// <summary>
-        /// Calculates the hessian, which is the matrix of second derivatices numerically for models with two parameters.
+        /// Calculates the hessian, which is the matrix of second derivatices numerically 
+        /// for models with two parameters.
         /// Assumes that loglikelihood has been implemented.
         /// </summary>
         /// <param name="k">The shape parameter.</param>
         /// <param name="lmb">The scale parameter.</param>
-        /// <returns>A MathNet 2x2 matrix which is the second derivatives calculated numerically.</returns>
+        /// <returns>A MathNet 2x2 matrix which is the second derivatives calculated 
+        /// numerically.</returns>
         public Vector<double> NumericalGradLL(double k, double lmb)
         {
             double eps = 1e-5;
             Vector<double> grad = Vector<double>.Build.Dense(2);
 
-            double dellmb = (this.LogLikelihood(k, lmb + eps) - this.LogLikelihood(k, lmb - eps)) / (2 * eps);
-            double delk = (this.LogLikelihood(k + eps, lmb) - this.LogLikelihood(k - eps, lmb)) / (2 * eps);
+            double dellmb = (this.LogLikelihood(k, lmb + eps) 
+                    - this.LogLikelihood(k, lmb - eps)) / (2 * eps);
+            double delk = (this.LogLikelihood(k + eps, lmb) 
+                    - this.LogLikelihood(k - eps, lmb)) / (2 * eps);
 
             grad[0] = delk;
             grad[1] = dellmb;
@@ -537,12 +556,16 @@ namespace SurvivalCS
         {
             Matrix<double> hessian = Matrix<double>.Build.Dense(2, 2);
             double eps = 1e-4;
-            double dellmbsq = ((this.LogLikelihood(k, lmb + (2 * eps)) + this.LogLikelihood(k, lmb - (2 * eps)))
+            double dellmbsq = ((this.LogLikelihood(k, lmb + (2 * eps)) 
+                + this.LogLikelihood(k, lmb - (2 * eps)))
                 - (2 * this.LogLikelihood(k, lmb))) / (4 * (eps * eps));
-            double delksq = ((this.LogLikelihood(k + (2 * eps), lmb) + this.LogLikelihood(k - (2 * eps), lmb))
+            double delksq = ((this.LogLikelihood(k + (2 * eps), lmb) 
+                + this.LogLikelihood(k - (2 * eps), lmb))
                 - (2 * this.LogLikelihood(k, lmb))) / (4 * (eps * eps));
-            double dellmbk = (this.LogLikelihood(k + eps, lmb + eps) + this.LogLikelihood(k - eps, lmb - eps)
-                - this.LogLikelihood(k - eps, lmb + eps) - this.LogLikelihood(k + eps, lmb - eps)) / (4 * (eps * eps));
+            double dellmbk = (this.LogLikelihood(k + eps, lmb + eps) 
+                + this.LogLikelihood(k - eps, lmb - eps)
+                - this.LogLikelihood(k - eps, lmb + eps) 
+                - this.LogLikelihood(k + eps, lmb - eps)) / (4 * (eps * eps));
 
             hessian[1, 1] = dellmbsq;
             hessian[0, 0] = delksq;
